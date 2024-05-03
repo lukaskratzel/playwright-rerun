@@ -45,7 +45,7 @@ import type { ConsoleMessage } from '../../console';
 import { Dispatcher } from '../../dispatchers/dispatcher';
 import { serializeError } from '../../errors';
 
-const version: trace.VERSION = 6;
+const version: trace.VERSION = 7;
 
 export type TracerOptions = {
   name?: string;
@@ -536,6 +536,7 @@ function createBeforeActionTraceEvent(metadata: CallMetadata): trace.BeforeActio
     method: metadata.method,
     params: metadata.params,
     wallTime: metadata.wallTime,
+    stepId: metadata.stepId,
     pageId: metadata.pageId,
   };
 }
@@ -567,6 +568,7 @@ function createAfterActionTraceEvent(metadata: CallMetadata): trace.AfterActionT
   return {
     type: 'after',
     callId: metadata.id,
+    stepId: metadata.stepId,
     endTime: metadata.endTime,
     error: metadata.error?.error,
     result: metadata.result,

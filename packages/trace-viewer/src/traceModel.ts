@@ -18,6 +18,7 @@ import type * as trace from '@trace/trace';
 import type * as traceV3 from './versions/traceV3';
 import type * as traceV4 from './versions/traceV4';
 import type * as traceV5 from './versions/traceV5';
+import type * as traceV6 from './versions/traceV6';
 import { parseClientSideCallMetadata } from '../../../packages/playwright-core/src/utils/isomorphic/traceUtils';
 import type { ActionEntry, ContextEntry, PageEntry } from './entries';
 import { createEmptyContext } from './entries';
@@ -172,6 +173,7 @@ export class TraceModel {
         contextEntry.sdkLanguage = event.sdkLanguage;
         contextEntry.options = event.options;
         contextEntry.testIdAttributeName = event.testIdAttributeName;
+        contextEntry.canMatchByCallId = event.version >= 7;
         break;
       }
       case 'screencast-frame': {
@@ -265,7 +267,7 @@ export class TraceModel {
   private _modernize(event: any): trace.TraceEvent[] {
     if (this._version === undefined)
       return [event];
-    const lastVersion: trace.VERSION = 6;
+    const lastVersion: trace.VERSION = 7;
     let events = [event];
     for (let version = this._version; version < lastVersion; ++version)
       events = (this as any)[`_modernize_${version}_to_${version + 1}`].call(this, events);
@@ -433,8 +435,8 @@ export class TraceModel {
     return event;
   }
 
-  _modernize_5_to_6(events: traceV5.TraceEvent[]): trace.TraceEvent[] {
-    const result: trace.TraceEvent[] = [];
+  _modernize_5_to_6(events: traceV5.TraceEvent[]): traceV6.TraceEvent[] {
+    const result: traceV6.TraceEvent[] = [];
     for (const event of events) {
       result.push(event);
       if (event.type !== 'after' || !event.log.length)
@@ -449,6 +451,10 @@ export class TraceModel {
       }
     }
     return result;
+  }
+
+  _modernize_6_to_7(events: traceV6.TraceEvent[]): trace.TraceEvent[] {
+    return events;
   }
 }
 

@@ -38,6 +38,7 @@ export type ContextEntry = {
   stdio: trace.StdioTraceEvent[];
   errors: trace.ErrorTraceEvent[];
   hasSource: boolean;
+  canMatchByCallId?: boolean;
 };
 
 export type PageEntry = {
@@ -71,6 +72,6 @@ export function createEmptyContext(): ContextEntry {
     events: [],
     errors: [],
     stdio: [],
-    hasSource: false
+    hasSource: false,
   };
 }

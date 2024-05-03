@@ -169,9 +169,15 @@ function mergeActionsAndUpdateTiming(contexts: ContextEntry[]) {
   const primaryContexts = contexts.filter(context => context.isPrimary);
   const nonPrimaryContexts = contexts.filter(context => !context.isPrimary);
 
+  // In newer versions match by explicit step id, which is either the same as callId
+  // in both primary and non-primary contexts or written into stepId in the primary contexts.
+  const matchByCallId = primaryContexts.every(c => c.canMatchByCallId);
+
   for (const context of primaryContexts) {
-    for (const action of context.actions)
-      map.set(`${action.apiName}@${action.wallTime}`, { ...action, context });
+    for (const action of context.actions) {
+      const key = matchByCallId ? (action.stepId || action.callId) : `${action.apiName}@${action.wallTime}`;
+      map.set(key, { ...action, context });
+    }
     if (!offset && context.actions.length)
       offset = context.actions[0].startTime - context.actions[0].wallTime;
   }
@@ -191,7 +197,7 @@ function mergeActionsAndUpdateTiming(contexts: ContextEntry[]) {
           action.endTime = action.startTime + duration;
       }
 
-      const key = `${action.apiName}@${action.wallTime}`;
+      const key = matchByCallId ? action.callId : `${action.apiName}@${action.wallTime}`;
       const existing = map.get(key);
       if (existing && existing.apiName === action.apiName) {
         nonPrimaryIdToPrimaryId.set(action.callId, existing.callId);

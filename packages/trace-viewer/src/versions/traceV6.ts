@@ -14,14 +14,93 @@
  * limitations under the License.
  */
 
-import type { Point, SerializedError, StackFrame } from '@protocol/channels';
-import type { Language } from '../../playwright-core/src/utils/isomorphic/locatorGenerators';
-import type { FrameSnapshot, ResourceSnapshot } from './snapshot';
 
-export type Size = { width: number, height: number };
+import type { Entry as ResourceSnapshot } from '../../../trace/src/har';
 
-// Make sure you add _modernize_N_to_N1(event: any) to traceModel.ts.
-export type VERSION = 7;
+type Language = 'javascript' | 'python' | 'java' | 'csharp' | 'jsonl';
+type Point = { x: number, y: number };
+type Size = { width: number, height: number };
+
+type StackFrame = {
+  file: string,
+  line: number,
+  column: number,
+  function?: string,
+};
+
+type SerializedValue = {
+  n?: number,
+  b?: boolean,
+  s?: string,
+  v?: 'null' | 'undefined' | 'NaN' | 'Infinity' | '-Infinity' | '-0',
+  d?: string,
+  u?: string,
+  bi?: string,
+  m?: SerializedValue,
+  se?: SerializedValue,
+  r?: {
+    p: string,
+    f: string,
+  },
+  a?: SerializedValue[],
+  o?: {
+    k: string,
+    v: SerializedValue,
+  }[],
+  h?: number,
+  id?: number,
+  ref?: number,
+};
+
+type SerializedError = {
+  error?: {
+    message: string,
+    name: string,
+    stack?: string,
+  },
+  value?: SerializedValue,
+};
+
+type NodeSnapshot =
+  // Text node.
+  string |
+  // Subtree reference, "x snapshots ago, node #y". Could point to a text node.
+  // Only nodes that are not references are counted, starting from zero, using post-order traversal.
+  [ [number, number] ] |
+  // Just node name.
+  [ string ] |
+  // Node name, attributes, child nodes.
+  // Unfortunately, we cannot make this type definition recursive, therefore "any".
+  [ string, { [attr: string]: string }, ...any ];
+
+
+type ResourceOverride = {
+  url: string,
+  sha1?: string,
+  ref?: number
+};
+
+type FrameSnapshot = {
+  snapshotName?: string,
+  callId: string,
+  pageId: string,
+  frameId: string,
+  frameUrl: string,
+  timestamp: number,
+  collectionTime: number,
+  doctype?: string,
+  html: NodeSnapshot,
+  resourceOverrides: ResourceOverride[],
+  viewport: { width: number, height: number },
+  isMainFrame: boolean,
+};
+
+export type RenderedFrameSnapshot = {
+  html: string;
+  pageId: string;
+  frameId: string;
+  index: number;
+};
 
 export type BrowserContextEventOptions = {
   viewport?: Size,
@@ -61,7 +140,6 @@ export type BeforeActionTraceEvent = {
   method: string;
   params: Record<string, any>;
   wallTime: number;
-  stepId?: string;
   beforeSnapshot?: string;
   stack?: StackFrame[];
   pageId?: string;
@@ -86,7 +164,6 @@ export type AfterActionTraceEventAttachment = {
 export type AfterActionTraceEvent = {
   type: 'after',
   callId: string;
-  stepId?: string;
   endTime: number;
   afterSnapshot?: string;
   error?: SerializedError['error'];

@@ -118,7 +118,11 @@ export class Connection extends EventEmitter {
       this._tracingCount--;
   }
 
-  async sendMessageToServer(object: ChannelOwner, method: string, params: any, apiName: string | undefined, frames: channels.StackFrame[], wallTime: number | undefined): Promise<any> {
+  nextCallId() {
+    return ++this._lastId;
+  }
+
+  async sendMessageToServer(object: ChannelOwner, method: string, params: any, apiName: string | undefined, frames: channels.StackFrame[], wallTime: number | undefined, callId: number, stepId?: string): Promise<any> {
     if (this._closedError)
       throw this._closedError;
     if (object._wasCollected)
@@ -126,14 +130,14 @@ export class Connection extends EventEmitter {
 
     const guid = object._guid;
     const type = object._type;
-    const id = ++this._lastId;
+    const id = callId;
     const message = { id, guid, method, params };
     if (debugLogger.isEnabled('channel')) {
       // Do not include metadata in debug logs to avoid noise.
       debugLogger.log('channel', 'SEND> ' + JSON.stringify(message));
     }
     const location = frames[0] ? { file: frames[0].file, line: frames[0].line, column: frames[0].column } : undefined;
-    const metadata: channels.Metadata = { wallTime, apiName, location, internal: !apiName };
+    const metadata: channels.Metadata = { wallTime, apiName, location, internal: !apiName, stepId };
     if (this._tracingCount && frames && type !== 'LocalUtils')
       this._localUtils?._channel.addStackToTracingNoReply({ callData: { stack: frames, id } }).catch(() => {});
     // We need to exit zones before calling into the server, otherwise
