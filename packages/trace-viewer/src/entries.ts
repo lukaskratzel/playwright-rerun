@@ -38,7 +38,6 @@ export type ContextEntry = {
   stdio: trace.StdioTraceEvent[];
   errors: trace.ErrorTraceEvent[];
   hasSource: boolean;
-  canMatchByCallId?: boolean;
 };
 
 export type PageEntry = {

@@ -244,8 +244,8 @@ export class TestInfoImpl implements TestInfo {
     }
   }
 
-  _addStep(data: Omit<TestStepInternal, 'complete' | 'stepId' | 'steps'> & { callId?: number }): TestStepInternal {
-    const stepId = data.callId ? `call@${data.callId}` : `${data.category}@${++this._lastStepId}`;
+  _addStep(data: Omit<TestStepInternal, 'complete' | 'stepId' | 'steps'>): TestStepInternal {
+    const stepId = `${data.category}@${++this._lastStepId}`;
 
     let parentStep: TestStepInternal | undefined;
     if (data.isStage) {

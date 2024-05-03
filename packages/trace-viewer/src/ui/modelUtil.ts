@@ -169,9 +169,14 @@ function mergeActionsAndUpdateTiming(contexts: ContextEntry[]) {
   const primaryContexts = contexts.filter(context => context.isPrimary);
   const nonPrimaryContexts = contexts.filter(context => !context.isPrimary);
 
-  // In newer versions match by explicit step id, which is either the same as callId
-  // in both primary and non-primary contexts or written into stepId in the primary contexts.
-  const matchByCallId = primaryContexts.every(c => c.canMatchByCallId);
+  // Library actions (in the primary contests) are replaced by matching test runner steps
+  // (non primary context actions). Matching with the test runner steps enables to find
+  // right parent steps.
+  // - In the newer versions the actions are matched by explicit step id stored in the
+  //   library context actions.
+  // - In the older versions the step id is not stored and the match is perfomed based on
+  //   action name and wallTime.
+  const matchByCallId = primaryContexts.some(c => c.actions.some(a => !!a.stepId));
 
   for (const context of primaryContexts) {
     for (const action of context.actions) {

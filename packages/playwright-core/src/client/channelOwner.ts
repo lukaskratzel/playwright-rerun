@@ -145,10 +145,13 @@ export abstract class ChannelOwner<T extends channels.Channel = channels.Channel
               return await this._wrapApiCall(async apiZone => {
                 const { apiName, frames, csi, callCookie, wallTime, stepId } = apiZone.reported ? { apiName: undefined, csi: undefined, callCookie: undefined, frames: [], wallTime: undefined, stepId: undefined } : apiZone;
                 apiZone.reported = true;
-                const callId = this._connection.nextCallId();
-                if (csi && apiName)
-                  csi.onApiCallBegin(apiName, params, frames, wallTime, callCookie, callId);
-                return await this._connection.sendMessageToServer(this, prop, validator(params, '', { tChannelImpl: tChannelImplToWire, binary: this._connection.rawBuffers() ? 'buffer' : 'toBase64' }), apiName, frames, wallTime, callId, stepId);
+                let currentStepId = stepId;
+                if (csi && apiName) {
+                  const out: { stepId?: string } = {};
+                  csi.onApiCallBegin(apiName, params, frames, wallTime, callCookie, out);
+                  currentStepId = out.stepId;
+                }
+                return await this._connection.sendMessageToServer(this, prop, validator(params, '', { tChannelImpl: tChannelImplToWire, binary: this._connection.rawBuffers() ? 'buffer' : 'toBase64' }), apiName, frames, wallTime, currentStepId);
               });
             };
           }

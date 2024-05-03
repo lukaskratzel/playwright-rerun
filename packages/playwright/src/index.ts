@@ -247,7 +247,7 @@ const playwrightFixtures: Fixtures<TestFixtures, WorkerFixtures> = ({
     const artifactsRecorder = new ArtifactsRecorder(playwright, tracing().artifactsDir(), screenshot);
     await artifactsRecorder.willStartTest(testInfo as TestInfoImpl);
     const csiListener: ClientInstrumentationListener = {
-      onApiCallBegin: (apiName: string, params: Record<string, any>, frames: StackFrame[], wallTime: number, userData: any, callId?: number) => {
+      onApiCallBegin: (apiName: string, params: Record<string, any>, frames: StackFrame[], wallTime: number, userData: any, out: { stepId?: string }) => {
         const testInfo = currentTestInfo();
         if (!testInfo || apiName.includes('setTestIdAttribute'))
           return { userObject: null };
@@ -258,9 +258,9 @@ const playwrightFixtures: Fixtures<TestFixtures, WorkerFixtures> = ({
           apiName,
           params,
           wallTime,
-          callId,
         });
         userData.userObject = step;
+        out.stepId = step.stepId;
       },
       onApiCallEnd: (userData: any, error?: Error) => {
         const step = userData.userObject;

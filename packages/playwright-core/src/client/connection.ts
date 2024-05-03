@@ -118,11 +118,7 @@ export class Connection extends EventEmitter {
       this._tracingCount--;
   }
 
-  nextCallId() {
-    return ++this._lastId;
-  }
-
-  async sendMessageToServer(object: ChannelOwner, method: string, params: any, apiName: string | undefined, frames: channels.StackFrame[], wallTime: number | undefined, callId: number, stepId?: string): Promise<any> {
+  async sendMessageToServer(object: ChannelOwner, method: string, params: any, apiName: string | undefined, frames: channels.StackFrame[], wallTime: number | undefined, stepId?: string): Promise<any> {
     if (this._closedError)
       throw this._closedError;
     if (object._wasCollected)
@@ -130,7 +126,7 @@ export class Connection extends EventEmitter {
 
     const guid = object._guid;
     const type = object._type;
-    const id = callId;
+    const id = ++this._lastId;
     const message = { id, guid, method, params };
     if (debugLogger.isEnabled('channel')) {
       // Do not include metadata in debug logs to avoid noise.
