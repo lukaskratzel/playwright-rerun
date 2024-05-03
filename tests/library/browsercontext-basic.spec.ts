@@ -19,7 +19,6 @@ import { kTargetClosedErrorMessage } from '../config/errors';
 import { browserTest as it, expect } from '../config/browserTest';
 import { attachFrame, verifyViewport } from '../config/utils';
 import type { Page } from '@playwright/test';
-import { request } from '@playwright/test';
 
 it('should create new context @smoke', async function({ browser }) {
   expect(browser.contexts().length).toBe(0);
