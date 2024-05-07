@@ -64,6 +64,8 @@ export class TraceModel {
       const contextEntry = createEmptyContext();
       contextEntry.traceUrl = backend.traceURL();
       contextEntry.hasSource = hasSource;
+      // Test runner trace is always named 'test.trace'.
+      contextEntry.isPrimary = ordinal !== 'test';
       const modernizer = new TraceModernizer(contextEntry, this._snapshotStorage, this._attachments);
 
       const trace = await this._backend.readText(ordinal + '.trace') || '';

@@ -162,35 +162,17 @@ function indexModel(context: ContextEntry) {
 function mergeActionsAndUpdateTiming(contexts: ContextEntry[]) {
   const map = new Map<string, ActionTraceEventInContext>();
 
-  // Protocol call aka isPrimary contexts have startTime/endTime as server-side times.
-  // Step aka non-isPrimary contexts have startTime/endTime are client-side times.
-  // Adjust expect startTime/endTime on non-primary contexts to put them on a single timeline.
-  let offset = 0;
   const primaryContexts = contexts.filter(context => context.isPrimary);
   const nonPrimaryContexts = contexts.filter(context => !context.isPrimary);
 
   for (const context of primaryContexts) {
     for (const action of context.actions)
       map.set(`${action.apiName}@${action.wallTime}`, { ...action, context });
-    if (!offset && context.actions.length)
-      offset = context.actions[0].startTime - context.actions[0].wallTime;
   }
 
   const nonPrimaryIdToPrimaryId = new Map<string, string>();
-  const nonPrimaryTimeDelta = new Map<ContextEntry, number>();
   for (const context of nonPrimaryContexts) {
     for (const action of context.actions) {
-      if (offset) {
-        const duration = action.endTime - action.startTime;
-        if (action.startTime) {
-          const newStartTime = action.wallTime + offset;
-          nonPrimaryTimeDelta.set(context, newStartTime - action.startTime);
-          action.startTime = newStartTime;
-        }
-        if (action.endTime)
-          action.endTime = action.startTime + duration;
-      }
-
       const key = `${action.apiName}@${action.wallTime}`;
       const existing = map.get(key);
       if (existing && existing.apiName === action.apiName) {
@@ -209,14 +191,27 @@ function mergeActionsAndUpdateTiming(contexts: ContextEntry[]) {
     }
   }
 
-  for (const [context, timeDelta] of nonPrimaryTimeDelta) {
-    context.startTime += timeDelta;
-    context.endTime += timeDelta;
-    for (const event of context.events)
-      event.time += timeDelta;
-    for (const page of context.pages) {
-      for (const frame of page.screencastFrames)
-        frame.timestamp += timeDelta;
+  if (primaryContexts.length > 0) {
+    // Protocol call aka isPrimary contexts have startTime/endTime as server-side times.
+    // Step aka non-isPrimary contexts have startTime/endTime are client-side times.
+    // Adjust expect startTime/endTime on non-primary contexts to put them on a single timeline.
+    const primaryMonotonicOffset = primaryContexts[0].monotonicTimeOffset;
+    for (const context of nonPrimaryContexts) {
+      const timeDelta = context.monotonicTimeOffset - primaryMonotonicOffset;
+      context.startTime += timeDelta;
+      context.endTime += timeDelta;
+      for (const action of context.actions) {
+        if (action.startTime)
+          action.startTime += timeDelta;
+        if (action.endTime)
+          action.endTime += timeDelta;
+      }
+      for (const event of context.events)
+        event.time += timeDelta;
+      for (const page of context.pages) {
+        for (const frame of page.screencastFrames)
+          frame.timestamp += timeDelta;
+      }
     }
   }
 
