@@ -381,7 +381,7 @@ export class TraceModernizer {
     }
     for (const event of events) {
       if (event.type === 'context-options') {
-        result.push({...event, monotonicTimeOffset: 0});
+        result.push({ ...event, monotonicTimeOffset: 0 });
         continue;
       }
       if (!this._contextEntry.monotonicTimeOffset && event.type === 'before')
