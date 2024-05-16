@@ -155,7 +155,7 @@ export async function runTraceInBrowser(traceUrls: string[], options: TraceViewe
   validateTraceUrls(traceUrls);
   const server = await startTraceViewerServer(options);
   await installRootRedirect(server, traceUrls, options);
-  await openTraceInBrowser(server.urlPrefix());
+  await openTraceInBrowser(server.urlPrefixLocalhost());
 }
 
 export async function openTraceViewerApp(url: string, browserName: string, options?: TraceViewerAppOptions): Promise<Page> {

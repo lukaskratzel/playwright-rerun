@@ -418,7 +418,7 @@ export async function runUIMode(configFile: string | undefined, options: TraceVi
   return await innerRunTestServer(configLocation, options, async (server: HttpServer, cancelPromise: ManualPromise<void>) => {
     await installRootRedirect(server, [], { ...options, webApp: 'uiMode.html' });
     if (options.host !== undefined || options.port !== undefined) {
-      await openTraceInBrowser(server.urlPrefix());
+      await openTraceInBrowser(server.urlPrefixLocalhost());
     } else {
       const page = await openTraceViewerApp(server.urlPrefix(), 'chromium', {
         headless: isUnderTest() && process.env.PWTEST_HEADED_FOR_TEST !== '1',
