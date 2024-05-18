@@ -16,7 +16,9 @@
 
 import { settings } from './uiUtils';
 
-export function applyTheme() {
+export type Theme = 'dark-mode' | 'light-mode';
+
+export function applyTheme(theme?: Theme) {
   if ((document as any).playwrightThemeInitialized)
     return;
   (document as any).playwrightThemeInitialized = true;
@@ -28,13 +30,11 @@ export function applyTheme() {
     document.body.classList.add('inactive');
   }, false);
 
-  const currentTheme = settings.getString('theme', 'light-mode');
-  const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
-  if (currentTheme === 'dark-mode' || prefersDarkScheme.matches)
+  const defaultTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark-mode' : 'light-mode';
+  const currentTheme = theme ?? settings.getString('theme', defaultTheme);
+  if (currentTheme === 'dark-mode')
     document.body.classList.add('dark-mode');
 }
-
-type Theme = 'dark-mode' | 'light-mode';
 
 const listeners = new Set<(theme: Theme) => void>();
 export function toggleTheme() {
