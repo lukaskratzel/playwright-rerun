@@ -198,6 +198,20 @@ it('should follow redirects', async ({ context, server }) => {
   expect(await response.json()).toEqual({ foo: 'bar' });
 });
 
+it('should follow redirects correctly when Location header contains UTF-8 characters', async ({ context, server }) => {
+  it.info().annotations.push({ type: 'issue', description: 'https://github.com/microsoft/playwright/issues/30903' });
+  server.setRoute('/redirect', (req, res) => {
+    // Node.js only allows US-ASCII, so we can't send invalid headers directly. Sending it as a raw response instead.
+    res.socket.write('HTTP/1.1 301 Moved Permanently\r\n');
+    res.socket.write(`Location: ${server.PREFIX}/empty.html?message=マスクПривет\r\n`);
+    res.socket.write('\r\n');
+    res.socket.uncork();
+    res.socket.end();
+  });
+  const response = await context.request.get(server.PREFIX + '/redirect');
+  expect(response.url()).toBe(server.PREFIX + '/empty.html?' + new URLSearchParams({ message: 'マスクПривет' }));
+});
+
 it('should add cookies from Set-Cookie header', async ({ context, page, server }) => {
   server.setRoute('/setcookie.html', (req, res) => {
     res.setHeader('Set-Cookie', ['session=value', 'foo=bar; max-age=3600']);
