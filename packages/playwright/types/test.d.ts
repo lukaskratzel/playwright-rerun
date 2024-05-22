@@ -6472,6 +6472,7 @@ export type ExpectMatcherState = {
   isNot: boolean;
   promise: 'rejects' | 'resolves' | '';
   utils: ExpectMatcherUtils;
+  timeout: number;
 };
 
 export type MatcherReturnType = {
