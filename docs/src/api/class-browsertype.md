@@ -380,6 +380,12 @@ const { chromium } = require('playwright');  // Or 'webkit' or 'firefox'.
 ### option: BrowserType.launchServer.logger = %%-browser-option-logger-%%
 * since: v1.8
 
+### option: BrowserType.launchServer.host
+* since: v1.5
+- `host` <[string]>
+
+Host to use for the web socket. Defaults to `unspecified`.
+
 ### option: BrowserType.launchServer.port
 * since: v1.8
 - `port` <[int]>

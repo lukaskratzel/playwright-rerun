@@ -13746,6 +13746,11 @@ export interface BrowserType<Unused = {}> {
     headless?: boolean;
 
     /**
+     * Host to use for the web socket. Defaults to `unspecified`.
+     */
+    host?: string;
+
+    /**
      * If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
      * given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
      */
@@ -14620,6 +14625,11 @@ export interface Android {
      * connected.
      */
     deviceSerialNumber?: string;
+
+    /**
+     * Host to use for the web socket. Defaults to `localhost`.
+     */
+    host?: string;
 
     /**
      * Prevents automatic playwright driver installation on attach. Assumes that the drivers have been installed already.

@@ -77,7 +77,7 @@ export class WSServer {
           reject(new Error('Could not bind server socket'));
           return;
         }
-        const wsEndpoint = typeof address === 'string' ? `${address}${path}` : `ws://${hostname || 'localhost'}:${address.port}${path}`;
+        const wsEndpoint = typeof address === 'string' ? `${address}${path}` : `ws://${hostname || address.address}:${address.port}${path}`;
         resolve(wsEndpoint);
       }).on('error', reject);
     });
