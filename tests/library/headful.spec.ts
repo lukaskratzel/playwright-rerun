@@ -156,6 +156,7 @@ it('should(not) block third party cookies', async ({ page, server, allowsThirdPa
 
 it('should not block third party SameSite=None cookies', async ({ httpsServer, browserName, browser }) => {
   it.skip(browserName === 'webkit', 'No third party cookies in WebKit');
+  it.skip(!!process.env.PW_FREEZE_TIME);
   const page = await browser.newPage({
     ignoreHTTPSErrors: true,
   });
@@ -287,6 +288,7 @@ it('should click bottom row w/ infobar in OOPIF', async ({ browserName, launchPe
 it('headless and headful should use same default fonts', async ({ page, browserName, browserType }) => {
   it.info().annotations.push({ type: 'issue', description: 'https://github.com/microsoft/playwright/issues/11177' });
   it.skip(browserName === 'firefox', 'Text is misaligned in headed vs headless');
+  it.skip(!!process.env.PW_FREEZE_TIME);
 
   const genericFontFamilies = [
     'standard',

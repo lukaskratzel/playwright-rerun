@@ -150,7 +150,7 @@ it('should select the text with mouse', async ({ page, server }) => {
   const text = 'This is the text that we are going to try to select. Let\'s see how it goes.';
   await page.keyboard.type(text);
   // Firefox needs an extra frame here after typing or it will fail to set the scrollTop
-  await page.evaluate(() => new Promise(requestAnimationFrame));
+  await page.evaluate(() => new Promise(window.builtinRequestAnimationFrame));
   await page.evaluate(() => document.querySelector('textarea').scrollTop = 0);
   const { x, y } = await page.evaluate(dimensions);
   await page.mouse.move(x + 2, y + 2);

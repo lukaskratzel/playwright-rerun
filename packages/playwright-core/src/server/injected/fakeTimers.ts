@@ -19,5 +19,22 @@ import SinonFakeTimers from '../../third_party/fake-timers-src';
 import type * as channels from '@protocol/channels';
 
 export function install(params: channels.BrowserContextClockInstallOptions) {
-  return SinonFakeTimers.install(params);
+  // eslint-disable-next-line no-restricted-globals
+  const window = globalThis;
+  const builtin = {
+    setTimeout: window.setTimeout.bind(window),
+    clearTimeout: window.clearTimeout.bind(window),
+    setInterval: window.setInterval.bind(window),
+    clearInterval: window.clearInterval.bind(window),
+    requestAnimationFrame: window.requestAnimationFrame.bind(window),
+    cancelAnimationFrame: window.cancelAnimationFrame.bind(window),
+    setIdleCallback: window.requestIdleCallback.bind(window),
+    clearIdleCallback: window.cancelIdleCallback.bind(window),
+    performance: window.performance,
+    Intl: window.Intl,
+    Date: window.Date,
+  };
+  const result = SinonFakeTimers.install(params);
+  result.builtin = builtin;
+  return result;
 }

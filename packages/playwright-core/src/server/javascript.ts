@@ -20,6 +20,7 @@ import { serializeAsCallArgument } from './isomorphic/utilityScriptSerializers';
 import type { UtilityScript } from './injected/utilityScript';
 import { SdkObject } from './instrumentation';
 import { LongStandingScope } from '../utils/manualPromise';
+import { isUnderTest } from '../utils';
 
 export type ObjectId = string;
 export type RemoteObject = {
@@ -257,7 +258,7 @@ export async function evaluate(context: ExecutionContext, returnByValue: boolean
   return evaluateExpression(context, String(pageFunction), { returnByValue, isFunction: typeof pageFunction === 'function' }, ...args);
 }
 
-export async function evaluateExpression(context: ExecutionContext, expression: string, options: { returnByValue?: boolean, isFunction?: boolean, exposeUtilityScript?: boolean }, ...args: any[]): Promise<any> {
+export async function evaluateExpression(context: ExecutionContext, expression: string, options: { returnByValue?: boolean, isFunction?: boolean }, ...args: any[]): Promise<any> {
   const utilityScript = await context.utilityScript();
   expression = normalizeEvaluationExpression(expression, options.isFunction);
   const handles: (Promise<JSHandle>)[] = [];
@@ -290,7 +291,7 @@ export async function evaluateExpression(context: ExecutionContext, expression: 
   }
 
   // See UtilityScript for arguments.
-  const utilityScriptValues = [options.isFunction, options.returnByValue, options.exposeUtilityScript, expression, args.length, ...args];
+  const utilityScriptValues = [options.isFunction, options.returnByValue, isUnderTest(), expression, args.length, ...args];
 
   const script = `(utilityScript, ...args) => utilityScript.evaluate(...args)`;
   try {
