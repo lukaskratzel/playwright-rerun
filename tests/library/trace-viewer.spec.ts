@@ -558,6 +558,17 @@ test('should handle src=blob', async ({ page, server, runAndTrace, browserName }
   expect(size).toBe(10);
 });
 
+test('should handle file URIs', async ({ page, runAndTrace, browserName }) => {
+  test.skip(browserName === 'firefox');
+
+  const traceViewer = await runAndTrace(async () => {
+    await page.goto(new URL('file://' + path.join(__dirname, '..', 'assets', 'one-style.html')).toString());
+  });
+
+  const frame = await traceViewer.snapshotFrame('page.goto');
+  await expect(frame.locator('body')).toHaveCSS('background-color', 'rgb(255, 192, 203)');
+});
+
 test('should preserve currentSrc', async ({ browser, server, showTraceViewer }) => {
   const traceFile = test.info().outputPath('trace.zip');
   const page = await browser.newPage({ deviceScaleFactor: 3 });
